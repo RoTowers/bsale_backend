@@ -163,9 +163,39 @@ class ECommerceController extends Controller
                                     ->orderByRaw($ordering)
                                     ->paginate($page);
 
-            return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
+            if($request->s == 'true'){
+                $categories = Product::join('category', 'product.category', '=', 'category.id')
+                                        ->groupBy(['category.id','category.name'])
+                                        ->select(
+                                            'category.id',
+                                            'category.name',
+                                            DB::raw('count(*) as count')
+                                        )
+                                        ->get();
+                $pricesRange = Product::select(
+                                            DB::raw('MIN(product.price - ((product.price * product.discount) / 100)) as min'),
+                                            DB::raw('MAX(product.price - ((product.price * product.discount) / 100)) as max')
+                                        )->get();
+                return response()->json(['status' => 1, 'message' => 'success', 'data' => $products, 'data2' => $categories, 'data3' => $pricesRange]);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
+            }
         } catch (\Throwable $th) {
             return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
+        }
+    }
+
+    public function getSomeProducts(Request $request)
+    {
+        try {
+            $products = Product::orderByRaw('product.discount DESC')
+                                ->orderByRaw('product.price DESC')
+                                ->limit($request->quantity)
+                                ->get();
+            
+            return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.'.$th->getMessage()]);
         }
     }
 }

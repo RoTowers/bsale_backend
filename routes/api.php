@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 }); */
 // Obtiene todos los productos
 Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
+Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
 Route::post('/products/{page?}', 'App\Http\Controllers\ECommerceController@getProductsFilter');
 //Route::get('/products', 'App\Http\Controllers\ECommerceController@getProducts');
 Route::get('/search/{page?}', 'App\Http\Controllers\ECommerceController@search');

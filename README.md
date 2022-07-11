@@ -1,7 +1,5 @@
 **Lista de contenidos**
 
-[TOC]
-
 ### Estructura JSON
 
 Al realizar una petición HTTP, el servicio retornará un JSON con la siguiente estructura:
@@ -34,6 +32,63 @@ Al realizar una petición HTTP, el servicio retornará un JSON con la siguiente 
 	- **category**, hace referencia al id de la categoria asociada
 	
 Esta estructura es una base, ya que en otros endpoints retornará esta estructura con algunos datos agregados como los siguientes:
+
+#### Estructura JSON de Categorías y Rangos
+
+A la estructura base se le agregarán los siguientes valores en la data del JSON para retornar las categorías y rangos de precios:
+
+```json
+"data2": [
+        {
+            "id": 1,
+            "name": "bebida energetica",
+            "count": 8
+        },
+        {
+            "id": 2,
+            "name": "pisco",
+            "count": 21
+        },
+        {
+            "id": 3,
+            "name": "ron",
+            "count": 13
+        },
+        {
+            "id": 4,
+            "name": "bebida",
+            "count": 7
+        },
+        {
+            "id": 5,
+            "name": "snack",
+            "count": 5
+        },
+        {
+            "id": 6,
+            "name": "cerveza",
+            "count": 2
+        },
+        {
+            "id": 7,
+            "name": "vodka",
+            "count": 1
+        }
+    ],
+    "data3": [
+        {
+            "min": 500,
+            "max": 19990
+        }
+    ]
+```
+
+- **id**, identificador de la categoría en la base de datos.
+- **name**, nombre de la categoría.
+- **count**, cantidad de productos por categoría.
+- **min**, precio mínimo de todos los productos.
+- **max**, precio máximo de todos los productos.
+
 
 #### Estructura JSON de Paginación
 A la estructura base se le agregarán los siguientes valores en la data del JSON para realizar una paginación:
@@ -112,7 +167,7 @@ A la estructura base se le agregarán los siguientes valores en la data del JSON
 - **to**, número final del rango de productos que está retornando la página actual.
 - **total**, total de productos retornados en todas las páginas.
 
-### Listado de Todos los Productos
+### Rutas
 
 El siguiente bloque contiene las distintas rutas de la API:
 
@@ -122,39 +177,93 @@ Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
 Route::post('/products/{page?}', 'App\Http\Controllers\ECommerceController@getProductsFilter');
 Route::get('/search/{page?}', 'App\Http\Controllers\ECommerceController@search');
 ```
+### GET Listado de Todos los Productos
+`GET api/products` accederá a todos los productos ***(los productos se retornarán con una paginación por defecto de 12 productos por página)***
 
-Para acceder a los productos se debe utilizar el siguiente `endpoint` `(los productos se retornarán con una paginación por defecto de 12 productos por página)`:
-
-`api/products`
-
-petición que recepcionará la siguiente ruta `GET`:
+Petición que recepcionará la siguiente ruta:
 
 ```php
 Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
 ```
 
- El cual admite algunos parámetros opcionales como `page`, `o` y `s`. También retornará un JSON con la siguiente estructura:
+**Parámetros**
  
- Ej:
+ - ***page***, si el parametro `page` tiene un valor numerico se podrá acceder a pagina especifica de la paginacion.
  
- `?page=2` -> Si el parametro `page` tiene un valor numerico se podrá acceder a pagina especifica de la paginacion.
- 
-  `?o=3` -> Si el parametro `o` tiene un valor numerico del `1` al  `4` se retornarán los productos ordenados por `1 = nombre ascendentemente`, `2 = nombre descendentemente`, `3 = precio ascendentemente` y `4 = precio descendentemente`.
+- ***o***, si el parametro `o` tiene un valor numerico del `1` al  `4` se retornarán los productos ordenados por `1 = nombre ascendentemente`, `2 = nombre descendentemente`, `3 = precio ascendentemente` y `4 = precio descendentemente`.
   
-  `?s=true` -> Si el parámetro `s` tiene un valor `true` retornara el JSON agregando las categorias de productos que existen con sus respectivas cantidades
+- ***s***, si el parámetro `s` tiene un valor `true` retornara el JSON agregando las categorias de productos que existen con sus respectivas cantidades
  
 
+**Ejemplo**
+
+- `GET api/products?page=2&o=3&s=true`
 
 ------------
 
-### Listado de Productos en Oferta
+### GET Listado de Productos en Oferta
 
-Para acceder a algunos productos en oferta se debe utilizar el siguiente `endpoint`:
-
-`api/some`
-
-El cual recepcionará la siguiente ruta `GET`:
+`GET api/some` accederá a algunos productos en oferta, los datos serán retornados ordenados descendentemente por descuento. El cual recepcionará la siguiente ruta:
 
 ```php
 Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
+```
+
+El endpoint admite el parámetro `quantity`.
+
+- ***quantity***, limita la cantidad de productos retornados, debe ser un valor numérico entero.
+
+**Ejemplo:**
+
+- `GET api/some?quantity=6`
+
+### GET Listado de Productos con Búsqueda
+
+`GET api/search` accederá a algunos productos con la opción de ser filtrados. Será recepcionado por la siguiente ruta:
+
+```php
+Route::get('/search/{page?}', 'App\Http\Controllers\ECommerceController@search');
+```
+
+**Parámetros**
+- ***page***, si el parametro `page` tiene un valor numerico se podrá acceder a pagina especifica de la paginacion.
+- ***o***, si el parametro `o` tiene un valor numerico del `1` al  `4` se retornarán los productos ordenados por `1 = nombre ascendentemente`, `2 = nombre descendentemente`, `3 = precio ascendentemente` y `4 = precio descendentemente`.
+- ***q***, texto a buscar.
+- ***s***, si el parámetro `s` tiene un valor `true` retornara el JSON agregando las categorias de productos que existen con sus respectivas cantidades
+
+**Ejemplo**
+- `GET api/search?page=2&q=pisco&s=true&o=3`
+
+
+### POST Listado de Productos con Filtros
+
+`POST api/products` accederá a algunos productos con la opción de ser filtrados. Será recepcionado por la siguiente ruta:
+
+```php
+Route::post('/products/{page?}', 'App\Http\Controllers\ECommerceController@getProductsFilter');
+```
+**Parámetros**
+- ***page***, número de página a retornar.
+- ***options***, objeto con opciones de parametros
+	- ***order***, ordenamiento de los datos `1,2,3 o 4`
+	- ***category***, arreglo de Id's de categorias
+	- ***price***, objeto con los valores de los precios mínimo y máximo
+		- ***min***, precio mínimo.
+		- ***max***, precio máximo.
+
+**Ejemplos**
+
+Se debe enviar un JSON con la siguiente estructura.
+
+```json
+{
+   "options": {
+		"categories": [2,3,4],
+		"price": {
+			"min": 500,
+			"max": 19990
+		},
+		"order": 4
+   }
+}
 ```

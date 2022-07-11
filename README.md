@@ -1,4 +1,4 @@
-**Lista de contenidos**
+## Documentación de la API
 
 ### Estructura JSON
 

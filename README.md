@@ -1,32 +1,15 @@
-El siguiente bloque contiene las distintas rutas de la API:
+**Lista de contenidos**
 
-```php
-Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
-Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
-Route::post('/products/{page?}', 'App\Http\Controllers\ECommerceController@getProductsFilter');
-Route::get('/search/{page?}', 'App\Http\Controllers\ECommerceController@search');
-```
+[TOC]
 
-Para acceder a los productos se debe utilizar el siguiente enlace `(los productos se retornarán con una paginación por defecto de 12 productos por página)`:
+### Estructura JSON
 
-`api/products`
-
-petición que recepcionará la siguiente ruta:
-
-```php
-Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
-```
-
- El cual admite algunos parámetros opcionales como `page`, `o` y `s`. También retornará un JSON con la siguiente estructura:
- 
-    
-
+Al realizar una petición HTTP, el servicio retornará un JSON con la siguiente estructura:
 ```JSON
 {
     "status": 1,
     "message": "success",
     "data": {
-        "current_page": 2,
         "data": [
             {
                 "id": 5,
@@ -37,6 +20,31 @@ Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index'
                 "category": 1
             }
         ],
+    }
+}
+```
+- **status**, status de la solicitud,`1 = success`, `2 = error`.
+- **message**, mensaje de estado de solicitud.
+- **data**, el listado de productos, donde se encuentran los siguientes parámetros:
+	- **id**, identificador del producto en la base de datos.
+	- **name**, nombre del producto
+	- **url_image**, enlace a la imagen del producto,
+	- **price**, precio del producto
+	- **discount**, descuento en porcentaje para el producto,
+	- **category**, hace referencia al id de la categoria asociada
+	
+Esta estructura es una base, ya que en otros endpoints retornará esta estructura con algunos datos agregados como los siguientes:
+
+#### Estructura JSON de Paginación
+A la estructura base se le agregarán los siguientes valores en la data del JSON para realizar una paginación:
+
+```JSON
+{
+    "status": 1,
+    "message": "success",
+    "data": {
+        "current_page": 2,
+        "data": [...],
         "first_page_url": "https://fierce-woodland-71648.herokuapp.com/api/products?page=1",
         "from": 13,
         "last_page": 5,
@@ -87,6 +95,45 @@ Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index'
     }
 }
 ```
+
+- **current_page**, página en la que está obteniendo los datos paginados.
+- **first_page_url**, enlace de la primera página.
+- **from**, numero de inicial del rango de productos que está retornando la página actual.
+- **last_page**, número de la última página.
+- **last_page_url**, url de la última página.
+- **links**, provee un arreglo con los links a cada página como los siguientes,
+	- **url**, url de la página.
+	- **label**, texto que hace referencia al numero de pagina que llevará el enlace.
+	- **active**, es `true` cuando es la página actual, de lo contrario es `false`
+- **next_page_url**, siguiente página desde la actual.
+- **path**, url del `endpoint`.
+- **per_page**, cuantos productos se retornarán por página.
+- **prev_page_url**, url de la página previa a la actual.
+- **to**, número final del rango de productos que está retornando la página actual.
+- **total**, total de productos retornados en todas las páginas.
+
+### Listado de Todos los Productos
+
+El siguiente bloque contiene las distintas rutas de la API:
+
+```php
+Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
+Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
+Route::post('/products/{page?}', 'App\Http\Controllers\ECommerceController@getProductsFilter');
+Route::get('/search/{page?}', 'App\Http\Controllers\ECommerceController@search');
+```
+
+Para acceder a los productos se debe utilizar el siguiente `endpoint` `(los productos se retornarán con una paginación por defecto de 12 productos por página)`:
+
+`api/products`
+
+petición que recepcionará la siguiente ruta `GET`:
+
+```php
+Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
+```
+
+ El cual admite algunos parámetros opcionales como `page`, `o` y `s`. También retornará un JSON con la siguiente estructura:
  
  Ej:
  
@@ -96,3 +143,18 @@ Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index'
   
   `?s=true` -> Si el parámetro `s` tiene un valor `true` retornara el JSON agregando las categorias de productos que existen con sus respectivas cantidades
  
+
+
+------------
+
+### Listado de Productos en Oferta
+
+Para acceder a algunos productos en oferta se debe utilizar el siguiente `endpoint`:
+
+`api/some`
+
+El cual recepcionará la siguiente ruta `GET`:
+
+```php
+Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
+```

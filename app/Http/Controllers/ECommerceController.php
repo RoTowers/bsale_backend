@@ -62,7 +62,7 @@ class ECommerceController extends Controller
                 return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
             }
         } catch (\Throwable $th) {
-            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.'.$th->getMessage()]);
+            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
         
     }
@@ -111,7 +111,7 @@ class ECommerceController extends Controller
             
             return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
         } catch (\Throwable $th) {
-            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.'.$th->getMessage()]);
+            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
     }
 
@@ -195,7 +195,7 @@ class ECommerceController extends Controller
             
             return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
         } catch (\Throwable $th) {
-            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.'.$th->getMessage()]);
+            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
     }
 }

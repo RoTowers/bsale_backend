@@ -43,7 +43,7 @@ class ECommerceController extends Controller
             }
         } catch (\Throwable $th) {
             /** En caso de haber ocurrido un error entonces se devuelve un mensaje */
-            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
+            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.'.$th->getMessage()]);
         }
         
     }

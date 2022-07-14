@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/* Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-}); */
-// Obtiene todos los productos
+// Obtiene todos los productos paginados
 Route::get('/products/{page?}', 'App\Http\Controllers\ECommerceController@index');
+// Obtiene algunos de los productos con descuentos
 Route::get('/some', 'App\Http\Controllers\ECommerceController@getSomeProducts');
+// Obtiene los productos en base a los filtros y paginados
 Route::post('/products/{page?}', 'App\Http\Controllers\ECommerceController@getProductsFilter');
+// Obtiene los productos paginados y en base a la busqueda
 Route::get('/search/{page?}', 'App\Http\Controllers\ECommerceController@search');

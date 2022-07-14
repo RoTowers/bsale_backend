@@ -11,57 +11,38 @@ class ECommerceController extends Controller
 {
     /**
      * Retorna los productos y si (s = start) es true entonces se retornan tambien las categorias con las respectivas cantidades de productos.
-     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $page
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $page = null)
     {
         try {
-            $ordering = 'product.name ASC';
-            if($request->o != null){
-                switch ($request->o) {
-                    case '1':
-                        $ordering = 'product.name ASC';
-                        break;
+            /** Se guarda el parametro o en la variable order */
+            $order = $request->o;
+            /** Se guarda el parametro s en la variable start */
+            $start = $request->s;
 
-                    case '2':
-                        $ordering = 'product.name DESC';
-                        break;
+            /** 
+             * Se crea un objeto de la clase Product y se llama a la funcion getProducts dentro del objeto
+             * que retornara los productos paginados y ordenados segun los parametros
+             */
+            $products = (new Product())->getProducts($page, $order);
 
-                    case '3':
-                        $ordering = '(price - ((price*discount)/100)) ASC';
-                        break;
-
-                    case '4':
-                        $ordering = '(price - ((price*discount)/100)) DESC';
-                        break;
-                    
-                    default:
-                        $ordering = 'product.name ASC';
-                        break;
-                }
-            }
-
-            $products = Product::orderByRaw($ordering)
-                                ->paginate($page);
-            if($request->s == 'true'){
-                $categories = Product::join('category', 'product.category', '=', 'category.id')
-                                        ->groupBy(['category.id','category.name'])
-                                        ->select(
-                                            'category.id',
-                                            'category.name',
-                                            DB::raw('count(*) as count')
-                                        )
-                                        ->get();
-                $pricesRange = Product::select(
-                                            DB::raw('MIN(product.price - ((product.price * product.discount) / 100)) as min'),
-                                            DB::raw('MAX(product.price - ((product.price * product.discount) / 100)) as max')
-                                        )->get();
+            /** Si start es true, entonces se llama tambien a las categorias y rangos de precios */
+            if($start == 'true'){
+                /** Se obtienen todas las categorias de la BD con la cantidad de productos que existen por categoria */
+                $categories = (new Category())->getCategories();
+                /** Obtiene los rangos de precio minimo y maximo teniendo en cuenta todos los productos que existen */
+                $pricesRange = (new Product())->getPricesRange();
+                /** retorna el response con los productos, categorias y rangos de precios */
                 return response()->json(['status' => 1, 'message' => 'success', 'data' => $products, 'data2' => $categories, 'data3' => $pricesRange]);
             }else{
+                /** retorna solo los productos */
                 return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
             }
         } catch (\Throwable $th) {
+            /** En caso de haber ocurrido un error entonces se devuelve un mensaje */
             return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
         
@@ -69,132 +50,99 @@ class ECommerceController extends Controller
 
     /**
      * Retorna los productos filtrados por categoria y rango de precios.
-     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $page
      * @return \Illuminate\Http\Response
      */
     public function getProductsFilter(Request $request, $page = null)
     {
         try {
-            $ordering = 'product.name ASC';
-            if(array_key_exists('order', $request->options) && $request->options["order"] != null){
-                switch ($request->options["order"]) {
-                    case '1':
-                        $ordering = 'product.name ASC';
-                        break;
+            /** Se guarda el parametro o en la variable order */
+            $order = $request->options["order"];
+            /** Se guarda el parametro categories */
+            $categories = $request->options["categories"];
+            /** Se crea un objeto y se guardan los precios minimo y maximo en ese objeto */
+            $pricesRange = new \stdClass();
+            $pricesRange->min = $request->options["price"]["min"];
+            $pricesRange->max = $request->options["price"]["max"];
 
-                    case '2':
-                        $ordering = 'product.name DESC';
-                        break;
-
-                    case '3':
-                        $ordering = '(price - ((price*discount)/100)) ASC';
-                        break;
-
-                    case '4':
-                        $ordering = '(price - ((price*discount)/100)) DESC';
-                        break;
-                    
-                    default:
-                        $ordering = 'product.name ASC';
-                        break;
-                }
-            }
-
-            $where = '1 = 1';
-            if(array_key_exists('categories', $request->options) && $request->options["categories"] != null){
-                $where = 'category in ('.implode(",", $request->options["categories"]).')';
-            }
-            $products = Product::whereBetween(DB::raw('price - ((price*discount)/100)'), [$request->options["price"]["min"], $request->options["price"]["max"]])
-                                ->whereRaw($where)
-                                ->orderByRaw($ordering)
-                                ->paginate($page);
+            /** 
+             * Se crea un objeto de la clase Product y se llama a la funcion getProductsByFilters dentro del objeto
+             * que retornara los productos paginados, ordenados y filtrados segun los parametros
+             */
+            $products = (new Product())->getProductsByFilters($page, $order, $categories, $pricesRange);
             
+            /** retorna los productos filtrados por categorias y rangos de precios, ademas de paginados y ordenados */
             return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
         } catch (\Throwable $th) {
+            /** En caso de haber ocurrido un error entonces se devuelve un mensaje */
             return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
     }
 
     /**
      * Filter result by Search.
-     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $page
      * @return \Illuminate\Http\Response
      */
     public function search(Request $request, $page = null)
     {
         try {
-            $ordering = 'product.name ASC';
-            if($request->o != null){
-                switch ($request->o) {
-                    case '1':
-                        $ordering = 'product.name ASC';
-                        break;
+            /** 
+             * Se guardan los parametros para ser enviados a la funcion que retorna los productos
+             * el parametro o en la variable order 
+             */
+            $order = $request->o;
+            /** Se guarda el parametro q en la variable search */
+            $search = $request->q;
+            /** Se guarda el parametro q en la variable start */
+            $start = $request->s;
 
-                    case '2':
-                        $ordering = 'product.name DESC';
-                        break;
+            /** 
+             * Se crea un objeto de la clase Product y se llama a la funcion getProductsBySearch dentro del objeto
+             * que retornara los productos paginados y ordenados segun los parametros, ademas de filtrados segun el texto a buscar
+             */
+            $products = (new Product())->getProductsBySearch($page, $order, $search);
 
-                    case '3':
-                        $ordering = '(product.price - ((product.price*product.discount)/100)) ASC';
-                        break;
-
-                    case '4':
-                        $ordering = '(product.price - ((product.price*product.discount)/100)) DESC';
-                        break;
-                    
-                    default:
-                        $ordering = 'product.name ASC';
-                        break;
-                }
-            }
-
-            $search = "".$request->q;
-            $where = '1 = 1';
-            if($search){
-                $where = "product.name like '%$search%' or ";
-                $where .= "category.name like '%$search%'";
-            }
-            $products = Product::join('category', 'product.category', '=', 'category.id')
-                                    ->whereRaw($where)
-                                    ->select(
-                                        'product.*',
-                                        'category.name as category_name'
-                                    )
-                                    ->orderByRaw($ordering)
-                                    ->paginate($page);
-
-            if($request->s == 'true'){
-                $categories = Product::join('category', 'product.category', '=', 'category.id')
-                                        ->groupBy(['category.id','category.name'])
-                                        ->select(
-                                            'category.id',
-                                            'category.name',
-                                            DB::raw('count(*) as count')
-                                        )
-                                        ->get();
-                $pricesRange = Product::select(
-                                            DB::raw('MIN(product.price - ((product.price * product.discount) / 100)) as min'),
-                                            DB::raw('MAX(product.price - ((product.price * product.discount) / 100)) as max')
-                                        )->get();
+            /** Si start es true, entonces se llama tambien a las categorias y rangos de precios */
+            if($start == 'true'){
+                /** Se obtienen todas las categorias de la BD con la cantidad de productos que existen por categoria */
+                $categories = (new Category())->getCategories();
+                /** Obtiene los rangos de precio minimo y maximo teniendo en cuenta todos los productos que existen */
+                $pricesRange = (new Product())->getPricesRange();
+                /** Retorna el response con los productos, categorias y rangos de precios */
                 return response()->json(['status' => 1, 'message' => 'success', 'data' => $products, 'data2' => $categories, 'data3' => $pricesRange]);
             }else{
+                /** retorna solo los productos */
                 return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
             }
         } catch (\Throwable $th) {
+            /** En caso de haber ocurrido un error entonces se devuelve un mensaje */
             return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
     }
 
+    /**
+     * Retorna los productos ordenados segun descuento prioritariamente y con limite de cantidad
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function getSomeProducts(Request $request)
     {
         try {
-            $products = Product::orderByRaw('product.discount DESC')
-                                ->orderByRaw('product.price DESC')
-                                ->limit($request->quantity)
-                                ->get();
+            /** Obtiene y guarda el valor de la cantidad */
+            $quantity = $request->quantity;
+            /** 
+             * Se crea un objeto de la clase Product y se llama a la funcion getSomeProducts dentro del objeto
+             * que retornara los productos ordenados descendentemente por descuento principalmente y limitados por la cantidad
+             */
+            $products = (new Product())->getSomeProducts($quantity);
             
+            /** retorna los productos ordenados y segun la cantidad ingresada en la variable quantity */
             return response()->json(['status' => 1, 'message' => 'success', 'data' => $products]);
         } catch (\Throwable $th) {
+            /** En caso de haber ocurrido un error entonces se devuelve un mensaje */
             return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
     }

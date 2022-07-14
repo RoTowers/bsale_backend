@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
-use DB;
 
 class ECommerceController extends Controller
 {
@@ -43,7 +42,7 @@ class ECommerceController extends Controller
             }
         } catch (\Throwable $th) {
             /** En caso de haber ocurrido un error entonces se devuelve un mensaje */
-            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.'.$th->getMessage()]);
+            return response()->json(['status' => 2, 'message' => 'Ocurrió un error en la solicitud, por favor, intente más tarde.']);
         }
         
     }

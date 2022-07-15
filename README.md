@@ -6,6 +6,12 @@ API para tienda e-commerce, con acceso a los productos y categorias de la Base d
 - Datos retornados con paginación
 - `endpoints` con funcionalidad de filtros y buscador y ordenamiento de los datos
 
+## Contenido
+Los arhivos mas importantes se encuentran en las siguientes rutas:
+- `routes/api.php`, las rutas que seran manejadas
+- `app/Http/Controllers/ECommerceController.php`, el controlador de principal
+- `app/Models/Product.php` y `app/Models/Category.php`, los modelos con las consultas a la base de datos
+
 ## Demo
 Si quieres ver una demo de una tienda online consumiendo esta API, puedes visitar [Demo del proyecto](https://pacific-river-42460.herokuapp.com/)
 

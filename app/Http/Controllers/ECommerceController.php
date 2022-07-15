@@ -59,7 +59,7 @@ class ECommerceController extends Controller
             /** Se guarda el parametro o en la variable order */
             $order = $request->options["order"];
             /** Se guarda el parametro categories */
-            $categories = $request->options["categories"];
+            $categories = array_key_exists('categories', $request->options) ? $request->options["categories"] : '';
             /** Se crea un objeto y se guardan los precios minimo y maximo en ese objeto */
             $pricesRange = new \stdClass();
             $pricesRange->min = $request->options["price"]["min"];

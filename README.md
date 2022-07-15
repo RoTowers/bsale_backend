@@ -9,7 +9,7 @@ API para tienda e-commerce, con acceso a los productos y categorias de la Base d
 ## Demo
 Si quieres ver una demo de una tienda online consumiendo esta API, puedes visitar [Demo del proyecto](https://pacific-river-42460.herokuapp.com/)
 
-Si quieres probar una demo de la API, puedes utilizar [Demo de a API](https://fierce-woodland-71648.herokuapp.com)
+Si quieres probar una demo de la API, puedes utilizar `https://fierce-woodland-71648.herokuapp.com`
 
 ## Cómo clonar
 

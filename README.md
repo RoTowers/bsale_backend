@@ -1,3 +1,26 @@
+# REAMDE.md
+
+API para tienda e-commerce, con acceso a los productos y categorias de la Base de datos provista por BSale.
+
+## Características
+- Datos retornados con paginación
+- `endpoints` con funcionalidad de filtros y buscador y ordenamiento de los datos
+
+## Demo
+Si quieres ver una demo de una tienda online consumiendo esta API, puedes visitar [Demo del proyecto](https://pacific-river-42460.herokuapp.com/)
+
+## Cómo clonar
+
+1. git clone https://github.com/RoTowers/bsale_backend.git
+2. cd bsale_backend
+3. `composer install`
+4. agregar archivo `.env` dentro de la carpeta bsale_backend con la configuración para la base de datos
+5. `php artisan serv`
+6. Se recomienda utilizar `Postman` para testear la API.
+
+
+------------
+
 ## Documentación de la API
 
 ### Estructura JSON
